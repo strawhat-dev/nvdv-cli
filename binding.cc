@@ -87,6 +87,26 @@ void toggleDigitalVibrance(const FunctionCallbackInfo<Value>& args) {
   args.GetReturnValue().Set(Number::New(iso, status));
 }
 
+void enableDigitalVibrance(const FunctionCallbackInfo<Value>& args) {
+  Isolate* iso = args.GetIsolate();
+  nvapi_SetDVCLevel = (nvapi_SetDVCLevel_t)(*nvapi_QueryInterface)(0x172409B4);
+  if (nvapi_SetDVCLevel == NULL) return reject(iso, "Could not load `nvapi_SetDVCLevel`");
+  NV_DISPLAY_DVC_INFO info = getDVCInfo();
+  int status = info.currentDV > info.minDV ? 0 : (*nvapi_SetDVCLevel)(handle, 0, info.maxDV);
+  if (status != 0) return reject(iso, "Could enable digital vibrance");
+  args.GetReturnValue().Set(Number::New(iso, status));
+}
+
+void disableDigitalVibrance(const FunctionCallbackInfo<Value>& args) {
+  Isolate* iso = args.GetIsolate();
+  nvapi_SetDVCLevel = (nvapi_SetDVCLevel_t)(*nvapi_QueryInterface)(0x172409B4);
+  if (nvapi_SetDVCLevel == NULL) return reject(iso, "Could not load `nvapi_SetDVCLevel`");
+  NV_DISPLAY_DVC_INFO info = getDVCInfo();
+  int status = info.currentDV == info.minDV ? 0 : (*nvapi_SetDVCLevel)(handle, 0, info.minDV);
+  if (status != 0) return reject(iso, "Could disable digital vibrance");
+  args.GetReturnValue().Set(Number::New(iso, status));
+}
+
 int init_nvapi() {
   int status = 1;
   if (handle > 0) return handle;
@@ -121,6 +141,8 @@ void init(Local<Object> exports) {
   NODE_SET_METHOD(exports, "getDigitalVibrance", getDigitalVibrance);
   NODE_SET_METHOD(exports, "setDigitalVibrance", setDigitalVibrance);
   NODE_SET_METHOD(exports, "toggleDigitalVibrance", toggleDigitalVibrance);
+  NODE_SET_METHOD(exports, "enableDigitalVibrance", enableDigitalVibrance);
+  NODE_SET_METHOD(exports, "disableDigitalVibrance", disableDigitalVibrance);
 }
 
 NODE_MODULE(NODE_GYP_MODULE_NAME, init)
