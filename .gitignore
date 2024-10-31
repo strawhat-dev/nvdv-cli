@@ -1,3 +1,7 @@
+build
+nvdv.exe
+bun.lockb
+
 # Logs
 logs
 *.log

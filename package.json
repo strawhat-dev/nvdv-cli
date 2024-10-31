@@ -1,0 +1,12 @@
+{
+  "name": "nvdv-cli",
+  "gypfile": true,
+  "private": true,
+  "scripts": {
+    "prebuild": "node-gyp.exe rebuild",
+    "build": "bun.exe build --compile --minify --sourcemap --bytecode ./nvdv.js --outfile nvdv.exe"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.1.12"
+  }
+}
