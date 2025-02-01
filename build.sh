@@ -5,11 +5,12 @@ cpp_flags=(
   -Wall
   -Wextra
   -Werror
-  -Wno-cast-function-type
+  -luser32
+  -lshell32
+  -Lnvapi/lib
+  -Invapi/include
   -march=native
   -std=c++20
-  -lshell32
-  -luser32
 )
 
 cd "$(dirname "$0")" && \

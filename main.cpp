@@ -1,9 +1,7 @@
-#include <cstdlib>
-//
-#include <nvapi.h>
 #include <windows.h>
 
 #include "CLI11.hpp"
+#include "nvapi.h"
 
 struct DVC_INFO {
   NvU32 _;
@@ -13,7 +11,7 @@ struct DVC_INFO {
 };
 
 typedef NvAPI_Status (*NvAPI_Initialize_t)();
-typedef const NvU32* (*NvAPI_QueryInterface_t)(NvU32 offset);
+typedef long long(WINAPI* NvAPI_QueryInterface_t)(...);
 typedef NvAPI_Status (*NvAPI_EnumNvidiaDisplayHandle_t)(NvU32 display, NvDisplayHandle* handle);
 typedef NvAPI_Status (*NvAPI_SetDVCLevel_t)(NvDisplayHandle handle, NvU32 display, NvU32 value);
 typedef NvAPI_Status (*NvAPI_GetDVCInfo_t)(NvDisplayHandle handle, NvU32 display, DVC_INFO* ref);
@@ -156,9 +154,9 @@ struct Subcommand {
 static const std::vector<Subcommand> subcommands{
   {"get", "Get the current digital vibrance", []() { dvc.execute = handle_get; }},
   {"set", "Set the current digital vibrance", []() { dvc.execute = handle_set; }},
-  {"toggle", "Toggle digital vibrance", []() { dvc.execute = handle_toggle; }},
-  {"enable", "Enable digital vibrance", []() { dvc.execute = handle_enable; }},
-  {"disable", "Disable digital vibrance", []() { dvc.execute = handle_disable; }},
+  {"enable", "Enable digital vibrance (set to max)", []() { dvc.execute = handle_enable; }},
+  {"disable", "Disable digital vibrance (set to min)", []() { dvc.execute = handle_disable; }},
+  {"toggle", "Toggle digital vibrance (between min and max)", []() { dvc.execute = handle_toggle; }},
 };
 
 static const std::vector<Subcommand> getcommands{
