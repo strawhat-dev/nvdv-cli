@@ -58,14 +58,14 @@ struct Options {
 
 static Options opts{};
 
-static NvU32 raw_to_percent(const NvU32 val) {
+static NvU32 raw_to_percent(const NvU32& val) {
   static const auto& [_, __, min, max]{dvc.info};
   static const double total{static_cast<double>(max - min)};
   static const double x{static_cast<double>(val - min) / total};
   return static_cast<NvU32>(x * 100.0);
 }
 
-static NvU32 percent_to_raw(const NvU32 val) {
+static NvU32 percent_to_raw(const NvU32& val) {
   static const auto& [_, __, min, max]{dvc.info};
   static const double total{static_cast<double>(max - min)};
   static const double x{static_cast<double>(val) / 100.0};
