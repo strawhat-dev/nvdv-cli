@@ -7,14 +7,14 @@ cpp_flags=(
   -Werror
   -luser32
   -lshell32
-  -Lnvapi/lib
-  -Invapi/include
-  -march=native
   -std=c++23
+  -march=native
+  -Lnvapi/amd64
+  -Invapi
 )
 
-cd "$(dirname "$0")/src" && \
-  rm -rfv ../out && \
-  mkdir -v ../out && \
+cd "$(dirname "$0")" && \
+  rm -rf out && \
+  mkdir out && \
   clang++.exe "${cpp_flags[@]}" \
-  main.cpp -o ../out/nvdv.exe
+  src/main.cpp -o out/nvdv.exe

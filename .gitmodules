@@ -1,0 +1,4 @@
+[submodule "nvapi"]
+	path = nvapi
+	url = git@github.com:NVIDIA/nvapi.git
+	branch = main

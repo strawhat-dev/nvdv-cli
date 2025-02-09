@@ -1,0 +1,9 @@
+{
+  "clangd.fallbackFlags": [
+    "-Wall",
+    "-Wextra",
+    "-std=c++23",
+    "-L../nvapi/amd64",
+    "-I../nvapi"
+  ]
+}
