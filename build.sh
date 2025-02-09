@@ -10,11 +10,11 @@ cpp_flags=(
   -Lnvapi/lib
   -Invapi/include
   -march=native
-  -std=c++20
+  -std=c++23
 )
 
-cd "$(dirname "$0")" && \
-  rm -rf out && \
-  mkdir out && \
+cd "$(dirname "$0")/src" && \
+  rm -rfv ../out && \
+  mkdir -v ../out && \
   clang++.exe "${cpp_flags[@]}" \
-  main.cpp -o out/nvdv.exe
+  main.cpp -o ../out/nvdv.exe
