@@ -13,5 +13,5 @@ CPPFLAGS=(
 )
 
 cd "$(dirname "$0")" && rm -rf out && mkdir out && \
-  { [[ -d nvapi ]] || git submodule update --init --remote; } && \
+  { [[ -d nvapi/amd64 ]] || git submodule update --init --remote; } && \
   clang++.exe "${CPPFLAGS[@]}" src/main.cpp -o out/nvdv.exe
