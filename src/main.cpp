@@ -58,14 +58,14 @@ static NvU32 raw_to_percent(const NvU32& value) {
   const auto& [_, __, min, max]{app.dvc.info};
   const double& total{static_cast<double>(max - min)};
   const double& decimal{static_cast<double>(value - min) / total};
-  return static_cast<NvU32>(decimal * 100.0);
+  return std::round(decimal * 100.0);
 }
 
 static NvU32 percent_to_raw(const NvU32& value) {
   const auto& [_, __, min, max]{app.dvc.info};
   const double& total{static_cast<double>(max - min)};
   const double& decimal{static_cast<double>(value) / 100.0};
-  return static_cast<NvU32>((decimal * total) + min);
+  return std::round((decimal * total) + min);
 }
 
 static NvU32 get_primary_display() {
@@ -87,7 +87,7 @@ static NvU32 handle_info() {
   const char& indicator{display == get_primary_display() ? '*' : '\0'};
 
   printf("Display %lu%c\n", display.value(), indicator);
-  printf("Current DV: %lu %c(%lu%%)\n", cur, pad, raw_to_percent(cur));
+  printf("Current DV: %lu%c (%lu%%)\n", cur, pad, raw_to_percent(cur));
   printf("Minimum DV: %lu  (0%%)\n", min);
   printf("Maximum DV: %lu (100%%)\n", max);
 
