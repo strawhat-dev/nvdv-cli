@@ -1,20 +1,17 @@
 #!/bin/bash
 
-cpp_flags=(
+CPPFLAGS=(
   -O3
   -Wall
   -Wextra
   -Werror
+  -Invapi
   -luser32
   -lshell32
   -std=c++23
-  -march=native
   -Lnvapi/amd64
-  -Invapi
 )
 
-cd "$(dirname "$0")" && \
-  rm -rf out && \
-  mkdir out && \
-  clang++.exe "${cpp_flags[@]}" \
-  src/main.cpp -o out/nvdv.exe
+cd "$(dirname "$0")" && rm -rf out && mkdir out && \
+  { [[ -d nvapi ]] || git submodule update --init --remote; } && \
+  clang++.exe "${CPPFLAGS[@]}" src/main.cpp -o out/nvdv.exe
