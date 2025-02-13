@@ -54,22 +54,22 @@ static Context app{};
 
 static const std::unique_ptr<NVAPI>& nvapi{std::make_unique<NVAPI>()};
 
-static NvU32 raw_to_percent(const NvU32& value) {
+static NvU32 raw_to_percent(const NvU32& value) noexcept {
   const auto& [_, __, min, max]{app.dvc.info};
   const double& total{static_cast<double>(max - min)};
   const double& decimal{static_cast<double>(value - min) / total};
-  return std::round(decimal * 100.0);
+  return static_cast<NvU32>(std::round(decimal * 100.0));
 }
 
-static NvU32 percent_to_raw(const NvU32& value) {
+static NvU32 percent_to_raw(const NvU32& value) noexcept {
   const auto& [_, __, min, max]{app.dvc.info};
   const double& total{static_cast<double>(max - min)};
   const double& decimal{static_cast<double>(value) / 100.0};
-  return std::round((decimal * total) + min);
+  return static_cast<NvU32>(std::round((decimal * total) + min));
 }
 
 static NvU32 get_primary_display() {
-  DISPLAY_DEVICE dd{};
+  DISPLAY_DEVICE dd;
   dd.cb = sizeof(DISPLAY_DEVICE);
   for (NvU32 i = 0; EnumDisplayDevices(NULL, i, &dd, 0); ++i) {
     if (dd.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE) return i + 1;
