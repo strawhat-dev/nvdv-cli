@@ -80,7 +80,7 @@ static NvU32 get_primary_display() {
   return reject("Unable to get primary display");
 }
 
-static NvU32 handle_info() {
+static NvAPI_Status handle_info() {
   const auto& [info, display, _]{app.dvc};
   const auto& [__, cur, min, max]{info};
   const char& pad{cur < 10 ? ' ' : '\0'};
@@ -94,7 +94,7 @@ static NvU32 handle_info() {
   return NVAPI_OK;
 }
 
-static NvU32 handle_set() {
+static NvAPI_Status handle_set() {
   const auto& [dvc, raw, value_to_set, _]{app};
   const auto& [__, cur, min, max]{dvc.info};
   const NvU32& dv{raw ? value_to_set : percent_to_raw(value_to_set)};
@@ -109,25 +109,25 @@ static NvU32 handle_set() {
   return NVAPI_OK;
 }
 
-static NvU32 handle_enable() {
+static NvAPI_Status handle_enable() {
   app.value_to_set = app.dvc.info.max;
   app.raw = true;
   return handle_set();
 }
 
-static NvU32 handle_disable() {
+static NvAPI_Status handle_disable() {
   app.value_to_set = app.dvc.info.min;
   app.raw = true;
   return handle_set();
 }
 
-static NvU32 handle_toggle() {
+static NvAPI_Status handle_toggle() {
   const auto& [_, cur, min, max]{app.dvc.info};
-  const std::function<NvU32()>& toggle{cur > min ? handle_disable : handle_enable};
+  const std::function<NvAPI_Status()>& toggle{cur > min ? handle_disable : handle_enable};
   return toggle();
 }
 
-static NvU32 init_nvapi() {
+static NvAPI_Status init_nvapi() {
   static const NvAPI_Initialize_t& init{(NvAPI_Initialize_t)(*nvapi->ptr)(NVAPI::INITIALIZE)};
   if (!init) return reject("Failed to load `nvapi_Initialize`");
 
