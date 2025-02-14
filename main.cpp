@@ -19,7 +19,7 @@ struct Context {
   DVC dvc{};
   bool raw{false};
   NvU32 value_to_set{NULL};
-  std::function<NvU32()> run_command{nullptr};
+  std::function<NvAPI_Status()> run_command{nullptr};
 };
 
 static NvAPI_Status reject(const char* reason) {
