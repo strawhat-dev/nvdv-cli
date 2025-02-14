@@ -22,7 +22,7 @@ struct Context {
   std::function<NvU32()> run_command{nullptr};
 };
 
-static NvU32 reject(const char* reason) {
+static NvAPI_Status reject(const char* reason) {
   std::cerr << "Error: " << reason << std::endl;
   throw std::runtime_error(reason);
   return NVAPI_ERROR;
