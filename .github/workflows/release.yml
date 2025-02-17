@@ -1,13 +1,18 @@
 name: release
 on:
-  push: { branches: [main] }
+  push: { branches: [main], tags: [v*.*.*] }
 jobs:
   build:
     runs-on: windows-latest
     steps:
-      - { uses: actions/checkout@v4, with: { submodules: true } }
-      - uses: egor-tensin/vs-shell@v2
-      - name: build
+      - name: Checkout
+        uses: actions/checkout@v4
+        with: { submodules: true }
+      - name: Setup
+        uses: egor-tensin/vs-shell@v2
+      - name: Build
         working-directory: ${{env.GITHUB_WORKSPACE}}
         run: cl.exe /std:c++latest /MD /O2 /W4 /WX /EHsc /I nvapi nvdv.cpp user32.lib shell32.lib /link /LIBPATH:nvapi\amd64
-      - { uses: actions/upload-artifact@v4, with: { path: nvdv.exe } }
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with: { files: nvdv.exe }
