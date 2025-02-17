@@ -5,7 +5,7 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - { uses: actions/checkout@v4, with: { submodules: true } }
       - uses: egor-tensin/vs-shell@v2
       - name: build
         working-directory: ${{env.GITHUB_WORKSPACE}}
