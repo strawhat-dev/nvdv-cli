@@ -1,6 +1,7 @@
 #include <windows.h>
-#include "nvapi.h"
 #include "CLI11.hpp"
+#include "version.h"
+#include "nvapi.h"
 
 #pragma warning(suppress: 4702)  // unreachable
 static NvAPI_Status reject(const char* reason) {
@@ -148,31 +149,32 @@ static NvAPI_Status init_nvapi() {
 }
 
 int main(int argc, char** argv) {
-  static CLI::App cli{"NVIDIA Digital Vibrance CLI"};
-  cli.add_option("-d,--display", nvdv::dvc.display, "specify a display number other than the primary to handle");
+  static CLI::App app{"NVIDIA Digital Vibrance CLI"};
+  app.set_version_flag("-v,--version", std::string(NVDV_VERSION));
+  app.add_option("-d,--display", nvdv::dvc.display, "Specify a display number other than the primary to handle");
 
-  static CLI::App* set{cli.add_subcommand("set", "set the current digital vibrance")};
+  static CLI::App* set{app.add_subcommand("set", "set the current digital vibrance")};
   set->add_flag("-r,--raw", nvdv::raw, "use raw values instead of percentage based scale");
   set->add_option("value", nvdv::value_to_set, "value in range [0, 100] (unless `--raw` is given)")->required();
   set->callback([]() { nvdv::run_command = handle_set; });
 
-  cli.add_subcommand("enable", "enable digital vibrance (set to max)")->callback([]() {
+  app.add_subcommand("enable", "enable digital vibrance (set to max)")->callback([]() {
     nvdv::run_command = handle_enable;
   });
 
-  cli.add_subcommand("disable", "disable digital vibrance (set to min)")->callback([]() {
+  app.add_subcommand("disable", "disable digital vibrance (set to min)")->callback([]() {
     nvdv::run_command = handle_disable;
   });
 
-  cli.add_subcommand("toggle", "toggle digital vibrance (between min and max)")->callback([]() {
+  app.add_subcommand("toggle", "toggle digital vibrance (between min and max)")->callback([]() {
     nvdv::run_command = handle_toggle;
   });
 
-  cli.add_subcommand("info", "output current digital vibrance control info")->callback([]() {
+  app.add_subcommand("info", "output current digital vibrance control info")->callback([]() {
     nvdv::run_command = handle_info;
   });
 
-  cli.require_subcommand(1);
-  CLI11_PARSE(cli, argc, cli.ensure_utf8(argv));
+  app.require_subcommand(1);
+  CLI11_PARSE(app, argc, app.ensure_utf8(argv));
   return init_nvapi(), nvdv::run_command();
 }
