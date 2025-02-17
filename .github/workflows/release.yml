@@ -10,3 +10,4 @@ jobs:
       - name: build
         working-directory: ${{env.GITHUB_WORKSPACE}}
         run: cl.exe /std:c++latest /MD /O2 /W4 /WX /EHsc /I nvapi nvdv.cpp user32.lib shell32.lib /link /LIBPATH:nvapi\amd64
+      - { uses: actions/upload-artifact@v4, with: { path: nvdv.exe } }
