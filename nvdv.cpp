@@ -1,7 +1,7 @@
 #include <signal.h>
 #include <windows.h>
+#include "nvapi/nvapi.h"
 #include "CLI11.hpp"
-#include "nvapi.h"
 #include "meta.h"
 
 static constexpr int ABORT_SIGNALS[11]{

@@ -12,8 +12,8 @@ jobs:
         uses: egor-tensin/vs-shell@v2
       - name: Build
         working-directory: ${{env.GITHUB_WORKSPACE}}
-        run: cl.exe /std:c++latest /MD /O2 /W4 /WX /EHsc /I nvapi nvdv.cpp user32.lib shell32.lib /link /LIBPATH:nvapi\amd64
+        run: cl.exe /std:c++latest /MD /O2 /W4 /WX /EHsc nvdv.cpp user32.lib shell32.lib
       - name: Release
         uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
         with: { files: nvdv.exe }
+        if: startsWith(github.ref, 'refs/tags/')

@@ -2,8 +2,6 @@
   "clangd.fallbackFlags": [
     "-Wall",
     "-Wextra",
-    "-std=c++23",
-    "-Lnvapi/amd64",
-    "-Invapi"
+    "-std=c++23"
   ]
 }

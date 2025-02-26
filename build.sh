@@ -5,11 +5,9 @@ CPPFLAGS=(
   -Wall
   -Wextra
   -Werror
-  -Invapi
   -luser32
   -lshell32
   -std=c++23
-  -Lnvapi/amd64
 )
 
 cd "$(dirname "$0")" && \
