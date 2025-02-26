@@ -2,7 +2,7 @@
 #include <windows.h>
 #include "nvapi/nvapi.h"
 #include "CLI11.hpp"
-#include "meta.h"
+#include "nvdv.hpp"
 
 static constexpr int ABORT_SIGNALS[11]{
   NVAPI_ERROR,
