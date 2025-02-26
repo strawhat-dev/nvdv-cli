@@ -1,7 +1,22 @@
+#include <signal.h>
 #include <windows.h>
 #include "CLI11.hpp"
-#include "version.h"
 #include "nvapi.h"
+#include "meta.h"
+
+static constexpr int ABORT_SIGNALS[11]{
+  NVAPI_ERROR,
+  SIGABRT,
+  SIGABRT_COMPAT,
+  SIGBREAK,
+  SIGFPE,
+  SIGILL,
+  SIGINT,
+  SIGSEGV,
+  SIGTERM,
+  WM_CLOSE,
+  WM_QUIT,
+};
 
 #pragma warning(suppress: 4702)  // unreachable
 static NvAPI_Status reject(const char* reason) {
@@ -49,14 +64,11 @@ struct NVAPI {
   }
 };
 
-struct DVC_INFO {
-  const NvU32 _{sizeof(DVC_INFO) | 0x10000};
-  const NvU32 cur;
-  const NvU32 min;
-  const NvU32 max;
-};
-
 struct DVC {
+ private:
+  // clang-format off
+  struct DVC_INFO { const NvU32 _{sizeof(DVC_INFO) | 0x10000}; const NvU32 cur; const NvU32 min; const NvU32 max; };  // clang-format on
+
   typedef NvAPI_Status (*NvAPI_EnumNvidiaDisplayHandle_t)(std::size_t display, NvDisplayHandle* handle);
   static constexpr std::intptr_t ENUM_NVIDIA_DISPLAY_HANDLE = 0x9abdd40d;
 
@@ -66,7 +78,6 @@ struct DVC {
   typedef NvAPI_Status (*NvAPI_SetDVCLevel_t)(NvDisplayHandle handle, std::size_t display, NvU32 value);
   static constexpr std::intptr_t SET_DVC_LEVEL = 0x172409b4;  // undocumented
 
- private:
   NvDisplayHandle handle{nullptr};
   NvAPI_SetDVCLevel_t nvapi_SetDVCLevel{nullptr};
 
@@ -117,10 +128,11 @@ struct DVC {
 
 // app context
 namespace nvdv {
-  static std::function<NvAPI_Status(DVC)> run_command{nullptr};
+  static HANDLE handle{nullptr};
   static const std::size_t display_count = get_display_count();
   static const std::size_t primary_display = get_primary_display();
   static const std::unique_ptr<NVAPI>& nvapi{std::make_unique<NVAPI>()};
+  static std::function<NvAPI_Status(const DVC&)> run_command{nullptr};
   static std::vector<std::size_t> displays{nvdv::primary_display};
   static std::vector<DVC> controllers;
   static NvU32 value_to_set = NULL;
@@ -128,12 +140,12 @@ namespace nvdv {
   static bool all = false;
 }  // namespace nvdv
 
-static NvAPI_Status init_displays() {
+static NvAPI_Status init_dvc() {
   if (nvdv::all) {
+    std::size_t n = 0;
     nvdv::displays.clear();
-    static std::size_t n = 0;
     nvdv::displays.resize(nvdv::display_count);
-    std::generate(nvdv::displays.begin(), nvdv::displays.end(), [] { return ++n; });
+    std::generate(nvdv::displays.begin(), nvdv::displays.end(), [&] { return ++n; });
   }
 
   for (const std::size_t n : nvdv::displays) {
@@ -144,12 +156,26 @@ static NvAPI_Status init_displays() {
   return nvdv::controllers.empty() ? reject("Unable to initialize dvc(s) for display(s)") : NVAPI_OK;
 }
 
+static void cleanup() {
+  ReleaseMutex(nvdv::handle);
+  CloseHandle(nvdv::handle);
+}
+
+static void ensure_single_instance() {
+  nvdv::handle = CreateMutex(NULL, TRUE, APP_NAME);
+  if (!nvdv::handle) reject("Unable to create mutex for nvdv handle");
+  if (GetLastError() == ERROR_ALREADY_EXISTS) CloseHandle(nvdv::handle), std::exit(0);
+  for (const int sig : ABORT_SIGNALS) signal(sig, [](const int code) { cleanup(), std::exit(code); });
+  std::atexit(cleanup);
+}
+
 int wmain(int argc, wchar_t* argv[]) {
-  static CLI::App app{"NVIDIA Digital Vibrance CLI"};
-  app.set_version_flag("-v,--version", std::string(NVDV_VERSION));
+  ensure_single_instance();
+  static CLI::App app{APP_NAME};
+  app.set_version_flag("-v,--version", APP_VERSION);
   app.add_option("-d,--display", nvdv::displays, "Specify other display number (handles only primary by default)");
   app.add_flag("-a,--all", nvdv::all, "Handle all available displays (overrides `--display`)");
-  static const std::function<NvAPI_Status(const DVC&)> handle_set{[](const DVC& dvc) {
+  static const std::function<NvAPI_Status(const DVC&)>& handle_set{[](const DVC& dvc) {
     return nvdv::raw ? dvc.set_raw(nvdv::value_to_set) : dvc.set(nvdv::value_to_set);
   }};
 
@@ -192,6 +218,6 @@ int wmain(int argc, wchar_t* argv[]) {
 
   app.require_subcommand(1);
   CLI11_PARSE(app, argc, argv);
-  if (init_displays() == NVAPI_OK) std::for_each(nvdv::controllers.begin(), nvdv::controllers.end(), nvdv::run_command);
+  if (init_dvc() == NVAPI_OK) std::for_each(nvdv::controllers.begin(), nvdv::controllers.end(), nvdv::run_command);
   return 0;
 }
